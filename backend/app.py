@@ -154,6 +154,12 @@ class ASLState:
         # self.lock = threading.Lock()
         self.lock = threading.RLock()
 
+        # bundle = joblib.load(MODEL_PATH)
+        # self.model = bundle["model"]
+        # self.detector = HandDetector(maxHands=2)  # or whatever predict_live.py uses
+
+        # # self.infer = LiveInfer(self.model, self.detector, seq_len=SEQ_LEN, smooth=SMOOTH_WINDOW)
+
 
         # game state
         self.sentence = ""
@@ -188,6 +194,10 @@ class ASLState:
         # model
         bundle = joblib.load(MODEL_PATH)
         self.model = bundle["model"]
+
+        # how many features the model expects (sklearn models have this)
+        self.expected_features = getattr(self.model, "n_features_in_", None)
+        print("MODEL expects features:", self.expected_features)
 
 
         # run loop thread
@@ -468,38 +478,83 @@ class ASLState:
             with self.lock:
                 self.lm_buffer.append(lm2)
                 self.buffer_fill = len(self.lm_buffer)
-
-            # ✅ Only infer occasionally (PRED_EVERY controls how often)
-            # If your UI still stutters, increase PRED_EVERY at top of file (e.g. 6 or 8)
+            
             if len(self.lm_buffer) == SEQ_LEN and (frame_idx % PRED_EVERY == 0):
                 try:
-                    seq = np.stack(self.lm_buffer, axis=0)  # (SEQ_LEN,2,21,3)
-                    feat = seq.reshape(1, -1)
+                    seq = np.stack(self.lm_buffer, axis=0)   # either (45,2,21,3) OR (45,21,3)
+
+                    # Build features in a way that matches what the model expects.
+                    # If model was trained on 1-hand (2835), reduce 2-hand -> 1-hand.
+                    if self.expected_features is not None:
+                        if seq.ndim == 4:
+                            # seq is (45,2,21,3)
+                            feat2 = seq.reshape(1, -1)  # 5670
+
+                            if feat2.shape[1] == self.expected_features:
+                                feat = feat2
+                            else:
+                                # fallback: use only first hand => (45,21,3) => 2835
+                                feat1 = seq[:, 0, :, :].reshape(1, -1)
+                                feat = feat1
+                        else:
+                            # seq is already (45,21,3)
+                            feat = seq.reshape(1, -1)
+                    else:
+                        # no n_features_in_, just flatten whatever we have
+                        feat = seq.reshape(1, -1)
 
                     pred = self.model.predict(feat)[0]
 
                     with self.lock:
                         self.pred_buffer.append(pred)
-                        self.last_pred = majority_vote(list(self.pred_buffer))
+                        smoothed = majority_vote(list(self.pred_buffer))
+                        self.last_pred = smoothed
 
-                        # OPTIONAL (expensive): top3 probabilities
-                        # Commented out for speed. Re-enable later if needed.
                         self.top3_text = ""
-                        # if hasattr(self.model, "predict_proba"):
-                        #     probs = self.model.predict_proba(feat)[0]
-                        #     top_idx = np.argsort(probs)[::-1][:3]
-                        #     top3 = [(self.model.classes_[i], float(probs[i])) for i in top_idx]
-                        #     self.top3_text = " | ".join([f"{c}:{p:.2f}" for c, p in top3])
+                        if hasattr(self.model, "predict_proba"):
+                            probs = self.model.predict_proba(feat)[0]
+                            top_idx = np.argsort(probs)[::-1][:3]
+                            top3 = [(self.model.classes_[i], float(probs[i])) for i in top_idx]
+                            self.top3_text = " | ".join([f"{c}:{p:.2f}" for c, p in top3])
 
-                    # update progression based on smoothed pred
                     self.advance_if_correct(self.last_pred)
 
                 except Exception as e:
-                    # Don't let inference errors kill streaming
                     with self.lock:
-                        self.top3_text = f"infer_err:{type(e).__name__}"
-                    # small breather so it doesn't spam
-                    time.sleep(0.005)
+                        self.last_pred = f"infer_err:{type(e).__name__}"
+                        self.top3_text = str(e)[:120]  # short error text
+
+            # ✅ Only infer occasionally (PRED_EVERY controls how often)
+            # If your UI still stutters, increase PRED_EVERY at top of file (e.g. 6 or 8)
+            # if len(self.lm_buffer) == SEQ_LEN and (frame_idx % PRED_EVERY == 0):
+            #     try:
+            #         seq = np.stack(self.lm_buffer, axis=0)  # (SEQ_LEN,2,21,3)
+            #         feat = seq.reshape(1, -1)
+
+            #         pred = self.model.predict(feat)[0]
+
+            #         with self.lock:
+            #             self.pred_buffer.append(pred)
+            #             self.last_pred = majority_vote(list(self.pred_buffer))
+
+            #             # OPTIONAL (expensive): top3 probabilities
+            #             # Commented out for speed. Re-enable later if needed.
+            #             self.top3_text = ""
+            #             # if hasattr(self.model, "predict_proba"):
+            #             #     probs = self.model.predict_proba(feat)[0]
+            #             #     top_idx = np.argsort(probs)[::-1][:3]
+            #             #     top3 = [(self.model.classes_[i], float(probs[i])) for i in top_idx]
+            #             #     self.top3_text = " | ".join([f"{c}:{p:.2f}" for c, p in top3])
+
+            #         # update progression based on smoothed pred
+            #         self.advance_if_correct(self.last_pred)
+
+            #     except Exception as e:
+            #         # Don't let inference errors kill streaming
+            #         with self.lock:
+            #             self.top3_text = f"infer_err:{type(e).__name__}"
+            #         # small breather so it doesn't spam
+            #         time.sleep(0.005)
 
             frame_idx += 1
             # Tiny sleep reduces CPU pegging and improves responsiveness on macOS
