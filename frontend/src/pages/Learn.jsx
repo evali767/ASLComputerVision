@@ -260,7 +260,9 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useAppState } from "../state/AppState";
 
 
-
+function tutorialKey(label) {
+  return label.trim().toUpperCase().replace(/\s+/g, "_");
+}
 
 
 
@@ -302,7 +304,24 @@ export default function Learn() {
   const target = gameState?.target ?? null;
   const done = gameState?.done ?? false;
 
+  const label = target?.label ?? target?.text ?? null;
 
+  // const videoSrc =
+  //   target?.kind === "word" && label
+  //     ? `/tutorials/${tutorialKey(label)}.mp4`
+  //     : null;
+  //const label = target?.label ?? target?.text ?? null;
+
+  const wordVideoSrc =
+    target?.kind === "word" && label
+      ? `/tutorials/${tutorialKey(label)}.mp4`
+      : null;
+
+  const letterVideoSrc =
+    target?.kind === "letter" && label
+      ? `/tutorials/${tutorialKey(label)}.mp4`
+      : null;
+  
 
 
   const HOLD_SECONDS = 2.5;
@@ -597,40 +616,78 @@ export default function Learn() {
     </div>
 
 
+        
+
         {target?.kind === "word" ? (
-          <div className="wordBox">
-            <div className="small">Word in database → tutorial video (placeholder).</div>
-            <div className="videoMock" style={{ padding: 0, overflow: "hidden" }}>
-            <video
-                key={target.video}
-                src={target.video}          // should be "/assets/testvid.mp4"
-                controls
-                autoPlay
-                muted
-                loop
-                playsInline
-                style={{ width: "100%", display: "block", borderRadius: 16 }}
-                onError={() => console.log("VIDEO FAILED:", target.video)}
-            />
+          wordVideoSrc ? (
+            <div className="wordBox">
+              <div className="small">Watch the sign, then click Next ↓</div>
+
+              <div className="videoMock" style={{ padding: 0, overflow: "hidden" }}>
+                <video
+                  key={wordVideoSrc}
+                  src={wordVideoSrc}
+                  controls
+                  autoPlay
+                  muted
+                  loop
+                  playsInline
+                  style={{ width: "100%", display: "block", borderRadius: 16 }}
+                  onError={() => console.log("VIDEO FAILED:", wordVideoSrc)}
+                />
+              </div>
+
+              <button
+                className="btn"
+                onClick={() => {
+                  if (wsRef.current?.readyState === WebSocket.OPEN) {
+                    wsRef.current.send(JSON.stringify({ type: "skip_word" }));
+                  }
+                }}
+                style={{ marginTop: 10 }}
+              >
+                I watched it → Next
+              </button>
             </div>
-            <button
-              className="btn"
-              onClick={() => {
-                if (wsRef.current?.readyState === WebSocket.OPEN) {
-                  wsRef.current.send(JSON.stringify({ type: "skip_word" }));
-                }
-              }}
-            >
-              I watched it → Next
-            </button>
-          </div>
+          ) : (
+            <div className="wordBox">
+              <div className="small">
+                No tutorial video found for: <b>{label}</b>
+              </div>
+              <button
+                className="btn"
+                onClick={() => {
+                  if (wsRef.current?.readyState === WebSocket.OPEN) {
+                    wsRef.current.send(JSON.stringify({ type: "skip_word" }));
+                  }
+                }}
+                style={{ marginTop: 10 }}
+              >
+                Skip → Next
+              </button>
+            </div>
+          )
         ) : (
+          // LETTER UI stays the prediction/hold box
           <div className="checkBox">
             <div className="pred"><b>Pred:</b> {pred ?? "..."}</div>
             <div className="small">{top3}</div>
 
-
-
+            {/* OPTIONAL: show a SMALL letter tutorial preview (doesn't take over) */}
+            {letterVideoSrc && (
+              <div style={{ marginTop: 10 }}>
+                <div className="small">Letter tutorial (optional):</div>
+                <video
+                  key={letterVideoSrc}
+                  src={letterVideoSrc}
+                  controls
+                  muted
+                  loop
+                  playsInline
+                  style={{ width: "100%", borderRadius: 12, marginTop: 6 }}
+                />
+              </div>
+            )}
 
             <div className="progressWrap">
               <div className="progressBar">
