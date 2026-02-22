@@ -1,0 +1,662 @@
+/* =========================================================
+   ASL Spellcaster — Bold Cute Wizardcore
+   Font: Fredoka (load in index.html)
+   Uses: --primary, --accent
+   ========================================================= */
+@import url("https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@400;600;700&display=swap");
+:root{
+  --primary: #7C3AED;   /* brighter violet */
+  --accent:  #F472B6;   /* hot pink magic (cute + bright) */
+  --ink: #221a33;
+  --muted: rgba(34,26,51,0.70);
+
+  --card: rgba(255,255,255,0.86);
+  --card2: rgba(255,255,255,0.92);
+  --stroke: rgba(255,255,255,0.60);
+
+  --shadow: 0 22px 55px rgba(18, 10, 35, 0.28);
+  --shadow2: 0 12px 26px rgba(18, 10, 35, 0.18);
+
+  --r-xl: 28px;
+  --r-lg: 22px;
+  --r-md: 16px;
+}
+
+html, body, #root { height: 100%; min-height: 100%; }
+* { box-sizing: border-box; }
+button, input { font-family: inherit; }
+
+body{
+  margin: 0;
+  font-family: "Fredoka", ui-rounded, system-ui, -apple-system, "Segoe UI", Roboto, Arial;
+  color: var(--ink);
+  overflow-x: hidden;
+
+  background:
+    /* cute floating glow orbs (adds "magical" depth) */
+    radial-gradient(220px 220px at 12% 18%, rgba(255, 255, 255, 0.22), transparent 70%),
+    radial-gradient(260px 260px at 28% 8%,  color-mix(in srgb, var(--accent) 55%, transparent), transparent 72%),
+    radial-gradient(240px 240px at 42% 22%, rgba(255, 214, 240, 0.26), transparent 72%),
+    radial-gradient(280px 280px at 64% 10%, color-mix(in srgb, var(--primary) 55%, transparent), transparent 74%),
+    radial-gradient(260px 260px at 86% 18%, rgba(255, 236, 180, 0.30), transparent 72%),
+
+    radial-gradient(240px 240px at 18% 62%, rgba(195, 245, 255, 0.22), transparent 72%),
+    radial-gradient(300px 300px at 52% 72%, rgba(210, 255, 208, 0.20), transparent 74%),
+    radial-gradient(260px 260px at 86% 66%, rgba(255, 210, 210, 0.18), transparent 72%),
+
+    /* house glow anchors (still there, but less "blob") */
+    radial-gradient(900px 600px at 12% 8%,
+      color-mix(in srgb, var(--accent) 88%, transparent),
+      transparent 58%),
+    radial-gradient(980px 640px at 88% 10%,
+      color-mix(in srgb, var(--primary) 88%, transparent),
+      transparent 60%),
+
+    /* dreamy haze */
+    radial-gradient(900px 520px at 50% 0%,
+      rgba(255, 255, 255, 0.22),
+      transparent 66%),
+
+    /* deeper base */
+    linear-gradient(180deg,
+      #160b2d 0%,
+      #120826 40%,
+      #08051a 100%);
+
+  background-attachment: fixed;
+  background-repeat: no-repeat;
+}
+
+/* Sparkles overlay (stronger, cute) */
+body::before{
+  content:"";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.55;
+  background:
+    radial-gradient(2px 2px at 10% 14%, rgba(255,255,255,0.95), transparent 55%),
+    radial-gradient(2px 2px at 18% 28%, rgba(255,255,255,0.85), transparent 55%),
+    radial-gradient(2px 2px at 30% 16%, rgba(255,255,255,0.90), transparent 55%),
+    radial-gradient(2px 2px at 44% 22%, rgba(255,255,255,0.80), transparent 55%),
+    radial-gradient(2px 2px at 58% 14%, rgba(255,255,255,0.88), transparent 55%),
+    radial-gradient(2px 2px at 74% 24%, rgba(255,255,255,0.86), transparent 55%),
+    radial-gradient(2px 2px at 88% 18%, rgba(255,255,255,0.86), transparent 55%),
+    radial-gradient(2px 2px at 20% 72%, rgba(255,255,255,0.70), transparent 55%),
+    radial-gradient(2px 2px at 52% 78%, rgba(255,255,255,0.65), transparent 55%),
+    radial-gradient(2px 2px at 84% 68%, rgba(255,255,255,0.72), transparent 55%);
+  mix-blend-mode: screen;
+  filter: blur(0.2px);
+}
+
+/* A subtle shimmer band */
+body::after{
+  display:none;
+  /* content:"";
+  position: fixed;
+  inset: -40px;
+  pointer-events:none;
+  opacity: 0.22;
+  background:
+    conic-gradient(from 180deg at 50% 50%,
+      transparent 0deg,
+      rgba(255,255,255,0.18) 40deg,
+      transparent 80deg,
+      rgba(255,255,255,0.12) 120deg,
+      transparent 180deg);
+  animation: shimmer 10s linear infinite; */
+}
+
+@keyframes shimmer{
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* ---- Layout ---- */
+.container{
+  max-width: 1140px;
+  margin: 0 auto;
+  padding: 18px 16px 32px;
+  color: #fff; /* text over dark bg */
+}
+
+.header{
+  display:flex;
+  align-items:flex-end;
+  justify-content:space-between;
+  gap: 14px;
+  margin-bottom: 12px;
+}
+
+.title{
+  margin: 0;
+  font-size: 40px;
+  letter-spacing: -0.8px;
+  line-height: 1.05;
+
+  /* candy gradient title */
+  background: linear-gradient(90deg,
+    color-mix(in srgb, var(--primary) 98%, #fff),
+    color-mix(in srgb, var(--accent) 98%, #fff),
+    #fff);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+
+  text-shadow: 0 2px 18px rgba(255,255,255,0.18);
+}
+
+.small{
+  /* font-size: 18px;
+  color: rgba(255,255,255,0.78);
+  margin-top: 6px; */
+  font-size: 0.95rem;     /* scales with html font-size */
+  color: rgba(255,255,255,0.78);
+  margin-top: 6px;
+}
+
+.footer{
+  margin-top: 14px;
+  color: rgba(255,255,255,0.70);
+}
+
+/* ---- Nav ---- */
+.nav{ display:flex; gap: 10px; }
+.navlink{
+  text-decoration:none;
+  color: #fff;
+  padding: 10px 14px;
+  border-radius: 999px;
+  border: 2px solid rgba(255,255,255,0.22);
+  background: rgba(255,255,255,0.10);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 16px 34px rgba(0,0,0,0.22);
+  transition: transform 120ms ease, background 120ms ease, box-shadow 120ms ease;
+}
+.navlink:hover{
+  transform: translateY(-2px);
+  background: rgba(255,255,255,0.14);
+  box-shadow: 0 22px 44px rgba(0,0,0,0.28);
+}
+.navlink.active{
+  border-color: color-mix(in srgb, var(--accent) 45%, rgba(255,255,255,0.22));
+  box-shadow: 0 0 0 5px color-mix(in srgb, var(--primary) 18%, transparent),
+              0 22px 44px rgba(0,0,0,0.28);
+}
+
+/* ---- Spellbook Card ---- */
+.card{
+  position: relative;
+  border-radius: var(--r-xl);
+  padding: 18px;
+  background: linear-gradient(180deg, var(--card2), var(--card));
+  border: 2px solid rgba(255,255,255,0.70);
+  box-shadow: var(--shadow);
+  color: var(--ink);
+  overflow: hidden;
+}
+
+/* cute magical border glow */
+.card::before{
+  content:"";
+  position:absolute;
+  inset: -2px;
+  border-radius: calc(var(--r-xl) + 2px);
+  background: linear-gradient(90deg,
+    color-mix(in srgb, var(--primary) 70%, #fff),
+    color-mix(in srgb, var(--accent) 70%, #fff),
+    color-mix(in srgb, var(--primary) 70%, #fff));
+  opacity: 0.35;
+  filter: blur(10px);
+  z-index: 0;
+}
+
+/* parchment doodles */
+.card::after{
+  content:"✦  ✧  ✦";
+  position:absolute;
+  right: 16px;
+  top: 14px;
+  font-weight: 700;
+  color: rgba(34,26,51,0.35);
+  z-index: 1;
+}
+
+.card > * { position: relative; z-index: 2; }
+
+.grid{
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+@media (max-width: 900px){ .grid{ grid-template-columns: 1fr; } }
+
+/* ---- Controls ---- */
+.row{ display:flex; gap: 10px; align-items:center; }
+
+.input{
+  flex:1;
+  padding: 12px 12px;
+  border-radius: 16px;
+  border: 2px solid rgba(34,26,51,0.12);
+  background: rgba(255,255,255,0.95);
+  color: var(--ink);
+  box-shadow: 0 10px 18px rgba(18,10,35,0.12);
+  outline: none;
+}
+.input:focus{
+  border-color: color-mix(in srgb, var(--primary) 55%, rgba(34,26,51,0.12));
+  box-shadow: 0 0 0 5px color-mix(in srgb, var(--accent) 18%, transparent),
+              0 14px 26px rgba(18,10,35,0.18);
+}
+
+/* super cute chunky button */
+.btn{
+  padding: 12px 16px;
+  border-radius: 16px;
+  border: 0;
+  cursor:pointer;
+  font-weight: 900;
+  letter-spacing: 0.2px;
+  color: #fff;
+  background: linear-gradient(135deg,
+    color-mix(in srgb, var(--primary) 92%, #fff),
+    color-mix(in srgb, var(--accent) 92%, #fff));
+  box-shadow: 0 18px 38px rgba(18,10,35,0.22);
+  transition: transform 120ms ease, box-shadow 120ms ease, filter 120ms ease;
+}
+.btn:hover{
+  transform: translateY(-2px);
+  box-shadow: 0 24px 48px rgba(18,10,35,0.28);
+  filter: brightness(1.03);
+}
+.btn:active{ transform: translateY(0px); }
+
+.divider{
+  height: 1px;
+  background: rgba(34,26,51,0.10);
+  margin: 14px 0;
+}
+
+/* ---- House tiles ---- */
+.houses{
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+@media (max-width: 720px){ .houses{ grid-template-columns: 1fr; } }
+
+.houseCard{
+  padding: 14px;
+  border-radius: 22px;
+  border: 2px solid rgba(34,26,51,0.10);
+  cursor:pointer;
+  background:
+    radial-gradient(700px 240px at 10% 0%,
+      color-mix(in srgb, var(--accent) 20%, #fff),
+      rgba(255,255,255,0.88) 60%),
+    rgba(255,255,255,0.88);
+  box-shadow: 0 14px 30px rgba(18,10,35,0.14);
+  transition: transform 120ms ease, box-shadow 120ms ease;
+}
+.houseCard:hover{
+  transform: translateY(-2px) rotate(-0.2deg);
+  box-shadow: 0 20px 44px rgba(18,10,35,0.18);
+}
+.houseCard.selected{
+  box-shadow:
+    0 0 0 6px color-mix(in srgb, var(--accent) 18%, transparent),
+    0 22px 44px rgba(18,10,35,0.20);
+  border-color: color-mix(in srgb, var(--primary) 45%, rgba(34,26,51,0.10));
+}
+
+.houseTitle{
+  font-weight: 900;
+  letter-spacing: -0.3px;
+  margin-bottom: 4px;
+}
+.houseTitle::before{ content:"🪄 "; }
+
+.target, .checkBox, .wordBox{
+  margin-top: 12px;
+  padding: 12px;
+  border-radius: var(--r-lg);
+  background: rgba(255,255,255,0.90);
+  border: 2px solid rgba(34,26,51,0.08);
+  box-shadow: 0 12px 22px rgba(18,10,35,0.10);
+}
+.pred{ font-size: 18px; font-weight: 900; }
+
+.progressWrap{ margin-top: 10px; }
+.progressBar{
+  height: 14px;
+  border-radius: 999px;
+  background: rgba(34,26,51,0.08);
+  border: 2px solid rgba(34,26,51,0.10);
+  overflow: hidden;
+}
+.progressFill{
+  height: 100%;
+  width: 0%;
+  border-radius: 999px;
+  background: linear-gradient(90deg,
+    color-mix(in srgb, var(--accent) 92%, #fff),
+    color-mix(in srgb, var(--primary) 92%, #fff));
+  box-shadow: inset 0 0 14px rgba(255,255,255,0.65);
+}
+
+.done{
+  margin-top: 12px;
+  padding: 12px;
+  border-radius: var(--r-lg);
+  background:
+    linear-gradient(135deg,
+      rgba(255,255,255,0.92),
+      color-mix(in srgb, var(--accent) 32%, #fff));
+  border: 2px solid rgba(34,26,51,0.10);
+}
+
+/* Leaderboard list */
+.lb{ margin: 0; padding-left: 18px; }
+.lb li{
+  display:flex;
+  justify-content:space-between;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(34,26,51,0.10);
+}
+.cap{ text-transform: capitalize; }
+
+/* Camera placeholders */
+.mockVideo{
+  height: 360px;
+  border-radius: 22px;
+  border: 2px dashed color-mix(in srgb, var(--primary) 30%, rgba(34,26,51,0.16));
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  background: rgba(255,255,255,0.16);
+  color: #fff;
+  box-shadow: 0 18px 36px rgba(0,0,0,0.22);
+}
+.videoMock{
+  height: 180px;
+  border-radius: 22px;
+  border: 2px dashed color-mix(in srgb, var(--accent) 30%, rgba(34,26,51,0.16));
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  background: rgba(255,255,255,0.14);
+  margin-top: 10px;
+  color: #fff;
+}
+
+/* ---- Readability fixes ---- */
+
+/* Keep header/nav text white on the dark bg */
+.container{
+  color: #fff;
+}
+
+/* BUT inside the main card, force dark text */
+.card{
+  color: var(--ink);
+}
+
+/* Make all text inside the card dark by default */
+.card h1, .card h2, .card h3, .card p, .card label, .card span, .card div{
+  color: var(--ink);
+}
+
+/* House cards: force readable dark text */
+.houseCard{
+  color: var(--ink);
+}
+.houseCard *{
+  color: var(--ink);
+}
+
+/* If your house subtitle line is too faint, tune it */
+.houseCard .small,
+.houseCard p{
+  color: rgba(34,26,51,0.75);
+}
+
+/* Buttons on light backgrounds should stay white text */
+.btn{
+  color: #fff;
+}
+
+.houseCard{
+  background: rgba(255,255,255,0.92);
+}
+
+
+/* ---- Global font scale up ---- */
+html{
+  font-size: 22px;   /* was ~16px default */
+}
+
+/* App-wide default text */
+.container{
+  font-size: 1rem;   /* 18px now */
+}
+
+/* Titles / headings */
+.title{
+  font-size: 3.1rem; /* ~56px */
+}
+.card h2{
+  font-size: 1.35rem; /* ~24px */
+}
+.card p{
+  font-size: 1.05rem; /* ~19px */
+}
+
+/* Inputs + buttons */
+.input{
+  font-size: 1.05rem;
+}
+.btn{
+  font-size: 1.05rem;
+}
+
+/* Nav pills */
+.navlink{
+  font-size: 1.02rem;
+  padding: 12px 16px;
+}
+
+/* House cards text */
+.houseTitle{
+  font-size: 1.08rem;
+}
+.houseCard{
+  font-size: 1.02rem;
+}
+
+
+/* --- Make the main title always readable --- */
+.title{
+  display: inline-block;
+  padding: 10px 16px;
+  border-radius: 999px;
+
+  /* frosted backplate */
+  background: rgba(15, 10, 28, 0.35);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.18);
+
+  /* strong contrast */
+  color: #fff;
+  text-shadow:
+    0 2px 8px rgba(0,0,0,0.55),
+    0 0 1px rgba(0,0,0,0.75);
+}
+
+
+/* --- Cute, magical title pill --- */
+.title{
+  display:inline-flex;
+  align-items:center;
+  gap: 10px;
+  padding: 14px 22px;
+  border-radius: 999px;
+
+  /* multi-layer magical glass */
+  background:
+    radial-gradient(120px 70px at 18% 30%, rgba(255,255,255,0.55), transparent 70%),
+    radial-gradient(160px 90px at 75% 25%, rgba(255,255,255,0.35), transparent 70%),
+    linear-gradient(135deg,
+      color-mix(in srgb, var(--accent) 35%, rgba(255,255,255,0.10)),
+      color-mix(in srgb, var(--primary) 35%, rgba(0,0,0,0.15))
+    );
+
+  border: 2px solid rgba(255,255,255,0.25);
+  box-shadow:
+    0 18px 40px rgba(0,0,0,0.35),
+    0 0 0 6px rgba(255,255,255,0.08) inset;
+
+  color: #fff;
+  text-shadow:
+    0 3px 14px rgba(0,0,0,0.55),
+    0 0 2px rgba(0,0,0,0.85);
+}
+
+/* Tiny sparkles near the title (pure CSS) */
+.title::after{
+  content:" ✨";
+  font-size: 0.9em;
+  filter: drop-shadow(0 6px 10px rgba(0,0,0,0.35));
+  opacity: 0.95;
+}
+
+
+/* --- Storybook card: warmer, glowy, more depth --- */
+.card{
+  background:
+    radial-gradient(900px 260px at 20% 0%, rgba(255,255,255,0.55), transparent 70%),
+    radial-gradient(700px 220px at 85% 15%, rgba(255,255,255,0.35), transparent 75%),
+    linear-gradient(180deg, rgba(255,255,255,0.78), rgba(255,255,255,0.66));
+
+  border: 2px solid rgba(255,255,255,0.40);
+  box-shadow:
+    0 28px 70px rgba(0,0,0,0.35),
+    0 0 0 8px rgba(255,255,255,0.10) inset;
+
+  position: relative;
+  overflow: hidden;
+}
+
+/* Cute “sparkly dust” inside the card */
+.card::before{
+  content:"";
+  position:absolute;
+  inset:-40px;
+  background:
+    radial-gradient(2px 2px at 10% 15%, rgba(255,255,255,0.55), transparent 60%),
+    radial-gradient(2px 2px at 30% 35%, rgba(255,255,255,0.45), transparent 60%),
+    radial-gradient(2px 2px at 65% 20%, rgba(255,255,255,0.45), transparent 60%),
+    radial-gradient(2px 2px at 88% 38%, rgba(255,255,255,0.35), transparent 60%),
+    radial-gradient(2px 2px at 52% 62%, rgba(255,255,255,0.35), transparent 60%);
+  opacity: 0.45;
+  pointer-events:none;
+  filter: blur(0.2px);
+}
+
+.houseCard{
+  background:
+    radial-gradient(240px 120px at 20% 25%, rgba(255,255,255,0.85), rgba(255,255,255,0.55)),
+    linear-gradient(135deg, rgba(255,255,255,0.92), rgba(255,255,255,0.70));
+  border: 2px solid rgba(255,255,255,0.65);
+  box-shadow:
+    0 10px 22px rgba(0,0,0,0.16),
+    0 0 0 6px rgba(255,255,255,0.10) inset;
+  transition: transform 160ms ease, box-shadow 160ms ease;
+}
+
+.houseCard:hover{
+  transform: translateY(-3px) rotate(-0.2deg);
+  box-shadow:
+    0 16px 30px rgba(0,0,0,0.20),
+    0 0 0 7px rgba(255,255,255,0.12) inset;
+}
+
+.houseCard.selected{
+  border-color: color-mix(in srgb, var(--primary) 65%, white);
+  box-shadow:
+    0 18px 34px rgba(0,0,0,0.22),
+    0 0 0 5px rgba(255,255,255,0.14) inset,
+    0 0 0 6px color-mix(in srgb, var(--primary) 35%, transparent);
+}
+
+.btn{
+  border: 0;
+  background:
+    radial-gradient(140px 70px at 20% 30%, rgba(255,255,255,0.35), transparent 70%),
+    linear-gradient(135deg, var(--primary), var(--accent));
+  box-shadow:
+    0 12px 22px rgba(0,0,0,0.20),
+    0 0 0 3px rgba(255,255,255,0.15) inset;
+}
+
+.btn:hover{
+  transform: translateY(-1px);
+}
+
+
+:root{
+  --font-display: "Fredoka", system-ui, -apple-system, Segoe UI, Roboto, Arial;
+  --font-body: "Nunito", system-ui, -apple-system, Segoe UI, Roboto, Arial;
+}
+
+body{
+  font-family: var(--font-body);
+}
+
+/* Big app title */
+.title{
+  font-family: var(--font-display);
+  letter-spacing: 0.2px;
+}
+
+/* Section headings */
+.card h2, .card h3, .houseTitle, .pred{
+  font-family: var(--font-display);
+}
+
+/* Buttons + inputs stay readable */
+.btn, .input, .navlink{
+  font-family: var(--font-body);
+  font-weight: 700;
+}
+
+/* Magical wand cursor */
+html, body, * {
+  cursor: url("/cursors/wand.png") 6 2, auto;
+}
+
+button, a, .btn, .houseCard, .navlink {
+  cursor: url("/cursors/wand-click.png") 6 2, pointer;
+}
+
+/* --- Sparkle trail --- */
+@keyframes sparkleFloat {
+  0%   { transform: translate(-50%, -50%) scale(0.6) rotate(0deg); opacity: 0; }
+  10%  { opacity: 1; }
+  100% { transform: translate(-50%, -90%) scale(1.4) rotate(18deg); opacity: 0; }
+}
+
+.sparkle {
+  position: fixed;
+  left: var(--x);
+  top: var(--y);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  z-index: 9999;
+  font-size: var(--size);
+  filter: drop-shadow(0 10px 14px rgba(0,0,0,0.25));
+  animation: sparkleFloat 700ms ease-out forwards;
+  will-change: transform, opacity;
+}
