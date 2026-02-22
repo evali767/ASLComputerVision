@@ -590,7 +590,7 @@ export default function Learn() {
 
 
             <div className="target">
-            <div><b>Current:</b> {targetLabel}</div>
+            <div>Current {targetLabel}</div>
             <div className="small">
                 Step {gameState?.total ? Math.min((gameState?.currentIndex ?? 0) + 1, gameState.total) : 0} / {gameState?.total ?? 0}
             </div>
@@ -600,22 +600,23 @@ export default function Learn() {
             <div className="small">Session points: <b>{points}</b></div>
             </div>
             <div className="checkBox" style={{ marginTop: 12 }}>
-    <div className="pred"><b>Live Pred:</b> {pred ?? "..."}</div>
-    <div className="small">{top3 ?? ""}</div>
+                <div className="pred"><b>Live Prediction:</b> {pred ?? "..."}</div>
+                <div className="small">{top3 ?? ""}</div>
 
 
-    <div className="progressWrap">
-        <div className="progressBar">
-        <div
-            className="progressFill"
-            style={{ width: `${Math.round((holdProgress ?? 0) * 100)}%` }}
-        />
-        </div>
-        <div className="small">Hold: {Math.round((holdProgress ?? 0) * 100)}%</div>
-    </div>
-    </div>
+                <div className="progressWrap">
+                    <div className="progressBar">
+                    <div
+                        className="progressFill"
+                        style={{ width: `${Math.round((holdProgress ?? 0) * 100)}%` }}
+                    />
+                    </div>
+                    <div className="small">Hold: {Math.round((holdProgress ?? 0) * 100)}%</div>
+                </div>
+                </div>
 
 
+<<<<<<< HEAD
         
 
         {target?.kind === "word" ? (
@@ -694,9 +695,30 @@ export default function Learn() {
                 <div className="progressFill" style={{ width: `${Math.round(holdProgress * 100)}%` }} />
               </div>
               <div className="small">Hold correct sign: {Math.round(holdProgress * 100)}%</div>
+=======
+                    {target?.kind === "word" ? (
+            <div className="wordBox">
+                {/* your word UI */}
             </div>
-          </div>
-        )}
+            ) : target?.kind === "letter" && !done ? (
+            <div className="checkBox">
+                <div className="pred"><b>Pred:</b> {pred ?? "..."}</div>
+                <div className="small">{top3}</div>
+
+                <div className="progressWrap">
+                <div className="progressBar">
+                    <div
+                    className="progressFill"
+                    style={{ width: `${Math.round(holdProgress * 100)}%` }}
+                    />
+                </div>
+                <div className="small">
+                    Hold correct sign: {Math.round(holdProgress * 100)}%
+                </div>
+                </div>
+>>>>>>> f7277cb3c14de25d8ed1dedd9f1680fbb25c9a11
+            </div>
+            ) : null}
 
 
 

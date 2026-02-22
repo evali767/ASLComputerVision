@@ -9,7 +9,7 @@ export default function Layout({ children }) {
     <div className="container">
       <header className="header">
         <div>
-          <h2 className="title">ASL Spellcaster</h2>
+          <h2 className="title">Hogwarts for ASL</h2>
           <div className="small">
             Welcome, <b>{playerName}</b> • House: <b>{house.name}</b>
           </div>

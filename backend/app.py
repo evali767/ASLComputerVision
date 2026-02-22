@@ -530,7 +530,7 @@ WORD_DB = {
     "my": {"label": "MY", "video": "/assets/MY.mp4"},
     "magic": {"label": "MAGIC", "video": "/assets/MAGIC.mp4"},
     "what": {"label": "WHAT", "video": "/assets/WHAT.mp4"},
-    "yes": {"label": "YES", "video": "/assets/YES.mp4"},
+    "please": {"label": "please", "video": "/assets/PLEASE.mp4"},
     "no": {"label": "NO", "video": "/assets/NO.mp4"},
     "your": {"label": "YOUR", "video": "/assets/YOUR.mp4"},
 }

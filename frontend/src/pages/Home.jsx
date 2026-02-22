@@ -34,7 +34,7 @@ export default function Home() {
 
       <div className="divider" />
 
-      <h4 style={{ marginBottom: 6 }}>Choose your House</h4>
+      <h4 style={{ marginBottom: 6 }}>Choose your House!</h4>
       <div className="houses">
         {HOUSES.map((h) => (
           <button
