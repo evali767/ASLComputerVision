@@ -7,7 +7,7 @@ import os
 from cvzone.HandTrackingModule import HandDetector
 
 cap = cv2.VideoCapture(0)
-detector = HandDetector(maxHands=1)
+detector = HandDetector(maxHands=2)
 
 offset = 20
 imgSize = 500
@@ -16,7 +16,7 @@ imgSize = 500
 DATA_ROOT = "Data"
 SEQ_LEN = 45  # ~1 second at ~30 fps
 
-current_label = "THANK YOU"          # default label
+current_label = "A"          # default label
 recording = False
 frames_buf = []
 lm_buf = []                  # list of (21, 3) landmarks per frame
@@ -53,6 +53,84 @@ def make_white(imgCrop, w, h, imgSize):
 
     return imgWhite
 
+def union_bbox(hands):
+    """Return one bbox that covers all detected hands."""
+    xs, ys, x2s, y2s = [], [], [], []
+    for h in hands:
+        x, y, w, hgt = h["bbox"]
+        xs.append(x); ys.append(y)
+        x2s.append(x + w); y2s.append(y + hgt)
+    x1, y1 = min(xs), min(ys)
+    x2, y2 = max(x2s), max(y2s)
+    return x1, y1, x2 - x1, y2 - y1
+
+# def two_hand_landmarks(hands):
+#     """
+#     Returns (2,21,3) float32 landmarks.
+#     Index 0 = Left hand, Index 1 = Right hand (if available).
+#     Missing hand -> zeros.
+#     """
+#     out = np.zeros((2, 21, 3), dtype=np.float32)
+
+#     # cvzone usually provides "type": "Left"/"Right"
+#     for h in hands:
+#         hand_type = h.get("type", None)
+#         lm = np.array(h["lmList"], dtype=np.float32)  # (21,3)
+#         if hand_type == "Left":
+#             out[0] = lm
+#         elif hand_type == "Right":
+#             out[1] = lm
+
+#     # fallback if type isn't present or only one got filled
+#     filled = (out.sum(axis=(1,2)) != 0)
+#     if not filled.any() and len(hands) > 0:
+#         out[0] = np.array(hands[0]["lmList"], dtype=np.float32)
+#         if len(hands) > 1:
+#             out[1] = np.array(hands[1]["lmList"], dtype=np.float32)
+
+#     return out
+
+def two_hand_landmarks(hands):
+    """
+    Returns (2,21,3) float32 landmarks.
+
+    Rule:
+    - If only ONE hand is detected: put it in slot 0, slot 1 = zeros.
+    - If TWO hands are detected: slot 0 = Left, slot 1 = Right (best effort).
+    """
+    out = np.zeros((2, 21, 3), dtype=np.float32)
+
+    if not hands:
+        return out
+
+    hands = hands[:2]
+
+    # If exactly one hand: ALWAYS store in slot 0
+    if len(hands) == 1:
+        out[0] = np.array(hands[0]["lmList"], dtype=np.float32)
+        return out
+
+    # Two hands: try to place by type if available
+    for h in hands:
+        hand_type = h.get("type", None)
+        lm = np.array(h["lmList"], dtype=np.float32)
+        if hand_type == "Left":
+            out[0] = lm
+        elif hand_type == "Right":
+            out[1] = lm
+
+    # Fallback if type info is missing or unreliable:
+    # sort by x of wrist (landmark 0) and assign leftmost->slot0, rightmost->slot1
+    if (out.sum(axis=(1, 2)) == 0).any():
+        lmA = np.array(hands[0]["lmList"], dtype=np.float32)
+        lmB = np.array(hands[1]["lmList"], dtype=np.float32)
+        if lmA[0, 0] <= lmB[0, 0]:
+            out[0], out[1] = lmA, lmB
+        else:
+            out[0], out[1] = lmB, lmA
+
+    return out
+
 while True:
     success, img = cap.read()
     if not success:
@@ -64,21 +142,39 @@ while True:
     lm_frame = None
 
     if hands:
-        hand = hands[0]
-        x, y, w, h = hand["bbox"]
+        # hand = hands[0]
+        # x, y, w, h = hand["bbox"]
 
-        imgCrop = safe_crop(img, x, y, w, h, offset)
-        imgWhite = make_white(imgCrop, w, h, imgSize)
+        # imgCrop = safe_crop(img, x, y, w, h, offset)
+        # imgWhite = make_white(imgCrop, w, h, imgSize)
 
-        # landmarks: cvzone gives list of 21 points like [x,y,z]
-        lm = hand["lmList"]
-        # store as numpy (21,3)
-        lm_frame = np.array(lm, dtype=np.float32)
+        # # landmarks: cvzone gives list of 21 points like [x,y,z]
+        # lm = hand["lmList"]
+        # # store as numpy (21,3)
+        # lm_frame = np.array(lm, dtype=np.float32)
 
-        if imgCrop.size != 0:
-            cv2.imshow("ImageCrop", imgCrop)
-        if imgWhite is not None:
-            cv2.imshow("ImageWhite", imgWhite)
+        # if imgCrop.size != 0:
+        #     cv2.imshow("ImageCrop", imgCrop)
+        # if imgWhite is not None:
+        #     cv2.imshow("ImageWhite", imgWhite)
+
+        if hands:
+            # keep at most 2 hands
+            hands = hands[:2]
+
+            # crop around BOTH hands together (important for 2-hand signs)
+            x, y, w, h = union_bbox(hands)
+
+            imgCrop = safe_crop(img, x, y, w, h, offset)
+            imgWhite = make_white(imgCrop, w, h, imgSize)
+
+            # always store (2,21,3)
+            lm_frame = two_hand_landmarks(hands)
+
+            if imgCrop.size != 0:
+                cv2.imshow("ImageCrop", imgCrop)
+            if imgWhite is not None:
+                cv2.imshow("ImageWhite", imgWhite)
 
     # overlay status
     status = f"Label: {current_label} | Recording: {recording} | Frames: {len(frames_buf)}/{SEQ_LEN}"
@@ -124,8 +220,11 @@ while True:
                 cv2.imwrite(os.path.join(seq_dir, f"frame_{i:03d}.jpg"), frame)
 
             # save landmarks (this is the key for motion)
+            # np.save(os.path.join(seq_dir, "landmarks.npy"),
+            #         np.stack(lm_buf, axis=0))  # shape (SEQ_LEN, 21, 3)
+
             np.save(os.path.join(seq_dir, "landmarks.npy"),
-                    np.stack(lm_buf, axis=0))  # shape (SEQ_LEN, 21, 3)
+            np.stack(lm_buf, axis=0))  # (SEQ_LEN, 2, 21, 3)
 
             print(f"Saved: {seq_dir}  (frames={len(frames_buf)})")
 

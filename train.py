@@ -13,14 +13,48 @@ RANDOM_STATE = 42
 
 TARGET_LEN = 45 
 
+# def fix_length(arr, target_len=TARGET_LEN):
+#     T = arr.shape[0]
+#     if T == target_len:
+#         return arr
+#     if T > target_len:
+#         return arr[:target_len]
+#     pad = np.repeat(arr[-1][None, :, :], target_len - T, axis=0)
+#     return np.concatenate([arr, pad], axis=0)
+
+TARGET_LEN = 45
+
 def fix_length(arr, target_len=TARGET_LEN):
+    """
+    Pads/truncates along time dimension (axis=0).
+    Works for arr shaped (T,21,3) or (T,2,21,3) etc.
+    """
     T = arr.shape[0]
     if T == target_len:
         return arr
     if T > target_len:
         return arr[:target_len]
-    pad = np.repeat(arr[-1][None, :, :], target_len - T, axis=0)
+    pad_count = target_len - T
+    last = arr[-1:]
+    pad = np.repeat(last, pad_count, axis=0)
     return np.concatenate([arr, pad], axis=0)
+
+def ensure_two_hands(arr):
+    """
+    Converts:
+      (T,21,3) -> (T,2,21,3) by adding a zero-hand
+      (T,2,21,3) stays as is
+    """
+    if arr.ndim == 3 and arr.shape[1:] == (21, 3):
+        T = arr.shape[0]
+        out = np.zeros((T, 2, 21, 3), dtype=np.float32)
+        out[:, 0, :, :] = arr  # put single hand in slot 0
+        return out
+
+    if arr.ndim == 4 and arr.shape[1:] == (2, 21, 3):
+        return arr.astype(np.float32)
+
+    raise ValueError(f"Unexpected landmarks shape: {arr.shape}")
 
 # ---- Load dataset ----
 X = []
@@ -36,14 +70,27 @@ for label in labels:
     for seq in os.listdir(label_dir):
         seq_dir = os.path.join(label_dir, seq)
         lm_path = os.path.join(seq_dir, "landmarks.npy")
+        # if os.path.exists(lm_path):
+        #     # arr = np.load(lm_path)      # (T, 21, 3)
+        #     # feat = arr.reshape(-1)      # flatten -> (T*21*3,)
+        #     # X.append(feat)
+        #     # y.append(label)
+        #     arr = np.load(lm_path)          # (T,21,3)
+        #     arr = fix_length(arr)           # (45,21,3)
+        #     feat = arr.reshape(-1)          # (45*21*3,)
+        #     X.append(feat)
+        #     y.append(label)
+
         if os.path.exists(lm_path):
-            # arr = np.load(lm_path)      # (T, 21, 3)
-            # feat = arr.reshape(-1)      # flatten -> (T*21*3,)
-            # X.append(feat)
-            # y.append(label)
-            arr = np.load(lm_path)          # (T,21,3)
-            arr = fix_length(arr)           # (45,21,3)
-            feat = arr.reshape(-1)          # (45*21*3,)
+            arr = np.load(lm_path)
+
+            # normalize to (T,2,21,3)
+            arr = ensure_two_hands(arr)
+
+            # fix time length to (45,2,21,3)
+            arr = fix_length(arr)
+
+            feat = arr.reshape(-1)  # (45*2*21*3,)
             X.append(feat)
             y.append(label)
 
