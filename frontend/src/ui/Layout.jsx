@@ -25,7 +25,7 @@ export default function Layout({ children }) {
       {children}
 
       <footer className="footer small">
-        Demo mode UI now — backend CV can plug in later.
+        {/* Demo mode UI now — backend CV can plug in later. */}
       </footer>
     </div>
   );

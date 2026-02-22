@@ -519,9 +519,31 @@ export default function Learn() {
 
 
 
-        <div className="small">
+        {/* <div className="small">
           Buffer: {gameState?.buffer ?? "—"} / {gameState?.seqLen ?? "—"}
-        </div>
+        </div> */}
+        {(() => {
+            const buf = gameState?.buffer ?? 0;
+            const len = gameState?.seqLen ?? 1;
+            const pct = Math.max(0, Math.min(100, Math.round((buf / len) * 100)));
+
+            return (
+                <div className="bufferUI">
+                <div className="bufferTop">
+                    <span className="bufferLabel">Casting meter</span>
+                    <span className="bufferPct">{pct}%</span>
+                </div>
+
+                <div className="bufferBar" aria-label={`Buffer ${pct}%`}>
+                    <div className="bufferFill" style={{ width: `${pct}%` }} />
+                </div>
+
+                <div className="bufferHint">
+                    {buf} / {len} frames
+                </div>
+                </div>
+            );
+            })()}
       </div>
 
 

@@ -379,19 +379,32 @@ body::after{
   color: #fff;
   box-shadow: 0 18px 36px rgba(0,0,0,0.22);
 }
-.videoMock{
-  height: 180px;
+
+
+.videoMock {
+  aspect-ratio: 4 / 3;         /* wider than square, not fully wide */
+  max-width: 300px;            /* adjust up/down to taste */
+  width: 100%;
+  height: auto;
   border-radius: 22px;
   border: 2px dashed color-mix(in srgb, var(--accent) 30%, rgba(34,26,51,0.16));
-  display:flex;
-  justify-content:center;
-  align-items:center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   background: rgba(255,255,255,0.14);
-  margin-top: 10px;
+  margin: 10px auto 0;         /* auto left/right = centered */
+  overflow: hidden;
   color: #fff;
 }
 
-/* ---- Readability fixes ---- */
+/* Make the video fill the container cleanly */
+.videoMock video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  border-radius: 20px;
+}
 
 /* Keep header/nav text white on the dark bg */
 .container{
@@ -775,4 +788,172 @@ button, a, .btn, .houseCard, .navlink {
 .successBtn:hover {
   transform: translateY(-2px) scale(1.03);
   filter: brightness(1.06);
+}
+
+.wordBox {
+  text-align: center;   /* ← add this one line */
+  margin-top: 12px;
+  padding: 12px;
+  border-radius: var(--r-lg);
+  background: rgba(255,255,255,0.90);
+  border: 2px solid rgba(34,26,51,0.08);
+  box-shadow: 0 12px 22px rgba(18,10,35,0.10);
+}
+
+
+
+
+
+/* ===========================
+   Cute buffer / "casting" bar
+   =========================== */
+
+.bufferUI {
+  margin-top: 10px;
+}
+
+.bufferTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.bufferLabel {
+  font-size: 0.9rem;
+  opacity: 0.85;
+}
+
+.bufferPct {
+  font-size: 0.85rem;
+  opacity: 0.75;
+}
+
+.bufferBar {
+  position: relative;
+  height: 14px;
+  border-radius: 999px;
+  overflow: hidden;
+
+  /* glassy pill */
+  background: rgba(255, 255, 255, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  box-shadow:
+    0 10px 24px rgba(18, 10, 35, 0.16),
+    inset 0 1px 0 rgba(255, 255, 255, 0.35);
+}
+
+.bufferFill {
+  height: 100%;
+  width: 0%;
+  border-radius: 999px;
+  transition: width 120ms linear;
+
+  /* magic gradient */
+  background: linear-gradient(90deg,
+    rgba(167, 139, 250, 0.95),
+    rgba(109, 40, 217, 0.95),
+    rgba(245, 158, 11, 0.95)
+  );
+
+  /* sparkle shimmer */
+  position: relative;
+}
+
+.bufferFill::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    115deg,
+    rgba(255,255,255,0) 0%,
+    rgba(255,255,255,0.35) 45%,
+    rgba(255,255,255,0) 60%
+  );
+  transform: translateX(-60%);
+  animation: bufferShimmer 1.1s linear infinite;
+  mix-blend-mode: screen;
+  opacity: 0.9;
+}
+
+@keyframes bufferShimmer {
+  to { transform: translateX(160%); }
+}
+
+.bufferHint {
+  margin-top: 6px;
+  font-size: 0.8rem;
+  opacity: 0.65;
+}
+
+
+
+/* ── Session Complete — paste into your existing CSS ── */
+
+/* Enhanced .done banner */
+.done {
+  margin-top: 12px;
+  padding: 24px 18px;
+  border-radius: var(--r-lg);
+  text-align: center;
+  font-family: var(--font-display, "Fredoka", system-ui);
+  font-size: 1.15rem;
+  font-weight: 700;
+
+  background:
+    radial-gradient(300px 160px at 50% 0%, rgba(255,255,255,0.65), transparent 70%),
+    linear-gradient(135deg,
+      color-mix(in srgb, var(--accent) 32%, #fff),
+      color-mix(in srgb, var(--primary) 26%, #fff));
+
+  border: 2.5px solid color-mix(in srgb, var(--primary) 40%, rgba(255,255,255,0.70));
+
+  box-shadow:
+    0 0 0 6px color-mix(in srgb, var(--accent) 16%, transparent),
+    0 0 0 12px color-mix(in srgb, var(--primary) 8%, transparent),
+    0 24px 50px rgba(18, 10, 35, 0.20);
+
+  animation: successPop 400ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+/* Whole Practice card glows when .done is inside it */
+.card:has(.done) {
+  border-color: color-mix(in srgb, var(--accent) 55%, rgba(255,255,255,0.40));
+  box-shadow:
+    0 0 0 4px color-mix(in srgb, var(--accent) 20%, transparent),
+    0 0 0 10px color-mix(in srgb, var(--primary) 10%, transparent),
+    0 28px 70px rgba(0,0,0,0.35),
+    0 0 0 8px rgba(255,255,255,0.10) inset;
+
+  animation: cardCelebrate 600ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+@keyframes cardCelebrate {
+  0%   { transform: scale(0.995); }
+  50%  { transform: scale(1.012); }
+  100% { transform: scale(1); }
+}
+
+/* Shimmer sweep across the card on completion */
+.card:has(.done)::after {
+  content: "✦  ✧  ✦  ✨";   /* override the default doodle with sparkles */
+  color: color-mix(in srgb, var(--accent) 60%, rgba(34,26,51,0.35));
+  animation: shimmerText 2s linear infinite;
+}
+
+/* Points number inside .done pulses */
+.done b {
+  display: inline-block;
+  font-size: 1.3em;
+  background: linear-gradient(90deg, var(--primary), var(--accent), var(--primary));
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: shimmerText 1.8s linear infinite, pointsPop 500ms 200ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+@keyframes pointsPop {
+  0%   { transform: scale(0.6) rotate(-6deg); opacity: 0; }
+  100% { transform: scale(1)   rotate(0deg);  opacity: 1; }
 }
